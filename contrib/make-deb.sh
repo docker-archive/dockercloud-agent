@@ -6,8 +6,8 @@ DEST=$1
 VERSION=$(cat VERSION)
 PKGVERSION="${VERSION:-latest}"
 PACKAGE_ARCHITECTURE="${ARCHITECTURE:-amd64}"
-PACKAGE_URL="http://www.docker.com/"
-PACKAGE_MAINTAINER="support@tutum.com"
+PACKAGE_URL="https://cloud.docker.com/"
+PACKAGE_MAINTAINER="support@docker.com"
 PACKAGE_DESCRIPTION="Agent to manage Docker hosts through Docker Cloud"
 PACKAGE_LICENSE="Proprietary"
 

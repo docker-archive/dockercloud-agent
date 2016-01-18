@@ -90,4 +90,4 @@ Currently supported and tested on:
 
 ## Reporting security issues
 
-In order to report a security issue, please send us an email to [security@tutum.co](mailto:security@tutum.co). Please use GPG key ID `666DAA4A` on `keys.gnupg.net` to encrypt your email. Thank you!
+In order to report a security issue, please send us an email to [security@docker.com](mailto:security@docker.com). Thank you!

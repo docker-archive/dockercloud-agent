@@ -1,6 +1,6 @@
 [Unit]
-Description=Agent to manage Docker hosts through Tutum
-Documentation=https://support.tutum.co/
+Description=Agent to manage Docker hosts through Docker Cloud
+Documentation=https://docs.docker.com/
 After=network.target docker.socket
 Requires=dockercloud-agent.socket
 

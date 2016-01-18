@@ -8,7 +8,7 @@ set -e
 # Staging
 GPG_KEY_ID=90E64D7C
 GPG_UID="Tutum Inc. (staging) <info@tutum.co>"
-S3_BUCKET=repo-test.tutum.co
+S3_BUCKET=repo-test.cloud.docker.com
 
 if [ ! -f "$1" ]; then
 	echo "Invalid package $1"

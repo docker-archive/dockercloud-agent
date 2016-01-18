@@ -1,15 +1,15 @@
 #!/bin/sh
 #
 # Usage:
-# curl -Ls https://get.tutum.co/ | sudo -H sh -s [Token] [UUID] [CertCommonName]
+# curl -Ls https://get.cloud.docker.com/ | sudo -H sh -s [Token] [UUID] [CertCommonName]
 #
 set -e
 GPG_KEY_ID=A87A2270
 GPG_KEY_PACKAGE_ID=${GPG_KEY_PACKAGE_ID:-A87A2270}
-GPG_KEY_URL=https://files.tutum.co/keys/$GPG_KEY_ID.pub
-GPG_KEY_PACKAGE_URL=https://files.tutum.co/keys/$GPG_KEY_PACKAGE_ID.pub
-REPO=${REPO:-repo.tutum.co}
-HOST=${HOST:-https://dashboard.tutum.co/}
+GPG_KEY_URL=https://files.cloud.docker.com/keys/$GPG_KEY_ID.pub
+GPG_KEY_PACKAGE_URL=https://files.cloud.docker.com/keys/$GPG_KEY_PACKAGE_ID.pub
+REPO=${REPO:-repo.cloud.docker.com}
+HOST=${HOST:-https://cloud.docker.com/}
 SUPPORT_URL=http://go.tutum.co/support-byon
 export DEBIAN_FRONTEND=noninteractive
 
@@ -22,7 +22,7 @@ If the node failed to register properly with Docker Cloud, try to restart the ag
 	service dockercloud-agent restart
 
 and check the logs at /var/log/dockercloud/agent.log for possible errors.
-If the problem persists, please contact us at support@tutum.co
+If the problem persists, please contact us at support@docker.com
 EOF
 	exit 1
 fi
