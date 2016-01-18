@@ -1,0 +1,6 @@
+/var/log/dockercloud/agent.log /var/log/dockercloud/docker.log {
+  rotate 0
+  copytruncate
+  sharedscripts
+  maxsize 10M
+}
