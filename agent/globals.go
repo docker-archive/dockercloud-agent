@@ -47,7 +47,7 @@ const (
 	KeyFileName            = "key.pem"
 	CertFileName           = "cert.pem"
 	CAFileName             = "ca.pem"
-	ConfigFileName         = "agent.conf"
+	ConfigFileName         = "dockercloud-agent.conf"
 	DockerBinaryName       = "docker"
 	DockerNewBinaryName    = "docker.new"
 	DockerNewBinarySigName = "docker.new.sig"
