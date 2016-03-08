@@ -12,9 +12,9 @@ import (
 	"syscall"
 	"time"
 
-	"code.google.com/p/go-shlex"
 	"github.com/blang/semver"
-	"github.com/tutumcloud/dockercloud-agent/utils"
+	"github.com/docker/dockercloud-agent/utils"
+	"github.com/flynn-archive/go-shlex"
 )
 
 func DownloadDocker(url, dockerBinPath string) {

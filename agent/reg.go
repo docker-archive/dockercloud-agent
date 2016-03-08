@@ -8,7 +8,7 @@ import (
 	"path"
 	"time"
 
-	"github.com/tutumcloud/dockercloud-agent/utils"
+	"github.com/docker/dockercloud-agent/utils"
 )
 
 type RegResponseForm struct {

@@ -1,4 +1,4 @@
-package main // import "github.com/tutumcloud/dockercloud-agent"
+package main // import "github.com/docker/dockercloud-agent"
 
 import (
 	"fmt"
@@ -8,8 +8,8 @@ import (
 	"syscall"
 	"time"
 
-	. "github.com/tutumcloud/dockercloud-agent/agent"
-	"github.com/tutumcloud/dockercloud-agent/utils"
+	. "github.com/docker/dockercloud-agent/agent"
+	"github.com/docker/dockercloud-agent/utils"
 )
 
 func init() {
