@@ -10,7 +10,7 @@ GPG_KEY_URL=https://files.cloud.docker.com/keys/$GPG_KEY_ID.pub
 GPG_KEY_PACKAGE_URL=https://files.cloud.docker.com/keys/$GPG_KEY_PACKAGE_ID.pub
 REPO=${REPO:-repo.cloud.docker.com}
 HOST=${HOST:-https://cloud.docker.com/}
-SUPPORT_URL=http://go.tutum.co/support-byon
+SUPPORT_URL=https://docs.docker.com/docker-cloud/tutorials/byoh/
 export DEBIAN_FRONTEND=noninteractive
 
 
