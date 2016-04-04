@@ -15,8 +15,8 @@ type RegResponseForm struct {
 	UserCaCert      string `json:"user_ca_cert"`
 	UUID            string `json:"uuid"`
 	CertCommonName  string `json:"external_fqdn"`
-	DockerBinaryURL string `json:"docker_url"`
-	NgrokBinaryURL  string `json:"ngrok_url"`
+	DockerTarURL    string `json:"docker_url"`
+	NgrokTarURL     string `json:"ngrok_url"`
 	PublicIpAddress string `json:"public_ip"`
 }
 
@@ -197,10 +197,10 @@ func handleRegResponse(body []byte, caFilePath, configFilePath string) error {
 		Conf.UUID = responseForm.UUID
 	}
 
-	DockerBinaryURL = responseForm.DockerBinaryURL
+	DockerTarURL = responseForm.DockerTarURL
 
-	if responseForm.NgrokBinaryURL != "" {
-		NgrokBinaryURL = responseForm.NgrokBinaryURL
+	if responseForm.NgrokTarURL != "" {
+		NgrokTarURL = responseForm.NgrokTarURL
 	}
 	// Save to configuration file
 	if isModified {

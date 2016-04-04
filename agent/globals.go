@@ -23,8 +23,8 @@ var (
 	DockerProcess             *os.Process
 	ScheduleToTerminateDocker = false
 	ScheduledShutdown         = false
-	DockerBinaryURL           = ""
-	NgrokBinaryURL            = ""
+	DockerTarURL              = ""
+	NgrokTarURL               = ""
 	NgrokHost                 = ""
 	DockerClientVersion       = ""
 )
@@ -37,24 +37,24 @@ const (
 )
 
 const (
-	AgentHome = "/etc/dockercloud/agent"
-	DockerDir = "/usr/lib/dockercloud"
-	LogDir    = "/var/log/dockercloud"
+	AgentHome    = "/etc/dockercloud/agent/"
+	DockerHome   = "/usr/bin/"
+	AgentLibHome = "/usr/lib/dockercloud/"
+	LogDir       = "/var/log/dockercloud/"
 
-	DockerSymbolicLink     = "/usr/bin/docker"
-	DockerLogFileName      = "docker.log"
-	AgentLogFileName       = "agent.log"
-	KeyFileName            = "key.pem"
-	CertFileName           = "cert.pem"
-	CAFileName             = "ca.pem"
-	ConfigFileName         = "dockercloud-agent.conf"
-	DockerBinaryName       = "docker"
-	DockerNewBinaryName    = "docker.new"
-	DockerNewBinarySigName = "docker.new.sig"
-	NgrokBinaryName        = "ngrok"
-	NgrokLogName           = "ngrok.log"
-	NgrokConfName          = "ngrok.conf"
-	AgentPidFile           = "/var/run/dockercloud-agent.pid"
+	DockerLogFileName = "docker.log"
+	AgentLogFileName  = "agent.log"
+	KeyFileName       = "key.pem"
+	CertFileName      = "cert.pem"
+	CAFileName        = "ca.pem"
+	ConfigFileName    = "dockercloud-agent.conf"
+	DockerBinaryName  = "docker"
+	DockerTarName     = "docker.tgz"
+	DockerTarSigName  = "docker.sig"
+	NgrokBinaryName   = "ngrok"
+	NgrokLogName      = "ngrok.log"
+	NgrokConfName     = "ngrok.conf"
+	AgentPidFile      = "/var/run/dockercloud-agent.pid"
 
 	RegEndpoint       = "api/agent/v1/node/"
 	DockerDefaultHost = "unix:///var/run/docker.sock"
