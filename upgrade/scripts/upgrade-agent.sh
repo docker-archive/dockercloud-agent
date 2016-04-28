@@ -84,5 +84,6 @@ else
         kill ${AGENT_PID}
     else
         echo "=> Please restart dockercloud-agent to apply the changes"
+        exit 2
     fi
 fi

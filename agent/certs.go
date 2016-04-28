@@ -16,7 +16,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tutumcloud/dockercloud-agent/utils"
+	"github.com/docker/dockercloud-agent/utils"
 )
 
 func CreateCerts(keyFilePath, certFilePath, host string) {
