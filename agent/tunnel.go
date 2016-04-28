@@ -117,7 +117,8 @@ func patchTunnel(url, tunnel string) {
 	}
 
 	headers := []string{"Authorization TutumAgentToken " + Conf.Token,
-		"Content-Type", "application/json"}
+		"Content-Type", "application/json",
+		"User-Agent dockercloud-agent/" + VERSION}
 	_, err = SendRequest("PATCH", utils.JoinURL(url, Conf.UUID), data, headers)
 	if err != nil {
 		SendError(err, "Failed to patch tunnel address to Docker Cloud", nil)
