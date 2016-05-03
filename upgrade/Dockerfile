@@ -1,5 +1,4 @@
-From alpine
-Maintainer Tutum Inc. <info@tutum.co>
+FROM alpine
 
 ADD scripts /scripts
 
