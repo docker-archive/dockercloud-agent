@@ -1,7 +1,9 @@
 package agent
 
 import (
+	"archive/tar"
 	"bytes"
+	"compress/gzip"
 	"crypto/md5"
 	"crypto/sha256"
 	"encoding/hex"
@@ -11,12 +13,14 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"path"
 	"strings"
 	"time"
 )
 
 type TargetDef struct {
-	Version             string `json:"version"`
+	Version             string `json: "version"`
 	Download_url        string `json: "download_url"`
 	Checksum_md5_url    string `json: "checksum_md5_url"`
 	Checksum_sha256_url string `json: "checksum_sha256_url"`
@@ -100,14 +104,14 @@ func HttpGet(url string) ([]byte, error) {
 	return body, nil
 }
 
-func downloadFile(url, path, name string) {
+func downloadFile(url, filepath, name string) {
 	Logger.Printf("Downloading %s definition from %s", name, url)
 	def := downloadTargetDef(url)
 
 	Logger.Printf("Downloading %s from %s", name, def.Download_url)
 	data := downloadTarget(def)
-	Logger.Printf("Saving %s to %s", name, path)
-	writeToFile(data, path)
+	Logger.Printf("Saving %s to %s", name, filepath)
+	uncompress(data, filepath)
 }
 
 func downloadTargetDef(url string) *TargetDef {
@@ -204,19 +208,53 @@ func getTarget(def *TargetDef) ([]byte, error) {
 	return b, nil
 }
 
-func writeToFile(binary []byte, path string) {
-	err := ioutil.WriteFile(path, binary, 0755)
-	for i := 1; ; i *= 2 {
-		if i > MaxWaitingTime {
-			i = 1
+func uncompress(data []byte, filefolder string) {
+	byteReader := bytes.NewReader(data)
+	gzipReader, err := gzip.NewReader(byteReader)
+	if err != nil {
+		SendError(err, "Failed to uncompress file", nil)
+		Logger.Print("Failed to uncompress file", err)
+	}
+	defer gzipReader.Close()
+	tarReader := tar.NewReader(gzipReader)
+	for {
+		header, err := tarReader.Next()
+		if err == io.EOF {
+			// end of tar archive
+			break
 		}
 		if err != nil {
-			SendError(err, "Failed to write to file", nil)
-			Logger.Printf("Failed to save the target: %s. Retrying in %d second", err, i)
-			time.Sleep(time.Duration(i) * time.Second)
-			err = ioutil.WriteFile(path, binary, 0755)
-		} else {
-			break
+			SendError(err, "Failed to uncompress file", nil)
+			Logger.Print("Failed to uncompress file", err)
+		}
+		filepath := path.Join(filefolder, path.Base(header.Name))
+
+		switch header.Typeflag {
+		case tar.TypeDir:
+			continue
+		case tar.TypeReg:
+			Logger.Print("Uncompressing: ", filepath)
+			f, err := os.OpenFile(filepath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, header.FileInfo().Mode())
+			if err != nil {
+				SendError(err, "Failed to open file", nil)
+				Logger.Print("Failed to open file", err)
+			}
+			defer f.Close()
+			for i := 1; ; i *= 2 {
+				if i > MaxWaitingTime {
+					i = 1
+				}
+				_, err := io.Copy(f, tarReader)
+				if err != nil {
+					SendError(err, "Failed to uncompress file", nil)
+					Logger.Printf("Failed to uncompress file: %s. Retrying in %d second", err, i)
+					time.Sleep(time.Duration(i) * time.Second)
+				} else {
+					break
+				}
+			}
+		default:
+			Logger.Print("Can't: %c, %s\n", header.Typeflag, filepath)
 		}
 	}
 }
