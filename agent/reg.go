@@ -59,7 +59,7 @@ func RegPost(url, caFilePath, configFilePath string) error {
 func RegPatch(url, caFilePath, certFilePath, configFilePath string) error {
 	form := RegPatchForm{}
 	form.AgentVersion = VERSION
-	form.DockerVersion = DockerClientVersion
+	form.DockerVersion = GetDockerClientVersion(path.Join(DockerHome, DockerBinaryName))
 	cert, err := GetCertificate(certFilePath)
 	if err != nil {
 		SendError(err, "Fatal: Failed to load public certificate", nil)

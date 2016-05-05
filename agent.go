@@ -66,10 +66,6 @@ func main() {
 		CreateCerts(keyFilePath, certFilePath, Conf.CertCommonName)
 	}
 
-	if utils.FileExist(dockerBinPath) {
-		DockerClientVersion = GetDockerClientVersion(dockerBinPath)
-	}
-
 	if !*FlagStandalone {
 		Logger.Printf("Registering in Docker Cloud via PATCH: %s",
 			regUrl+Conf.UUID)
@@ -103,6 +99,7 @@ func main() {
 	}
 
 	DownloadDocker(DockerTarURL, DockerHome)
+	Logger.Print("Found docker: version ", GetDockerClientVersion(dockerBinPath))
 
 	HandleSig()
 	syscall.Setpriority(syscall.PRIO_PROCESS, os.Getpid(), RenicePriority)
