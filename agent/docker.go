@@ -13,7 +13,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/blang/semver"
 	"github.com/docker/dockercloud-agent/utils"
 	"github.com/flynn-archive/go-shlex"
 )
@@ -27,41 +26,25 @@ func DownloadDocker(url, dockerHome string) {
 
 func GetDockerClientVersion(dockerBinPath string) (version string) {
 	var versionStr string
-	out, err := exec.Command("docker", "-v").Output()
+	out, err := exec.Command(dockerBinPath, "-v").Output()
 	if err != nil {
 		SendError(err, "Failed to get the docker version", nil)
 	}
 	versionStr = string(out)
 
 	if versionStr != "" {
-		re := regexp.MustCompile("(\\d+\\.\\d+)\\.\\d+")
+		re := regexp.MustCompile("\\d+\\.\\d+\\.\\d+[a-zA-Z0-9_\\-]*")
 		match := re.FindStringSubmatch(versionStr)
 		if match != nil && len(match) > 0 {
 			version = match[0]
 		}
 	}
-	Logger.Print("Found docker: version ", version)
 	return
 }
 
 func getDockerStartOpt(dockerBinPath, keyFilePath, certFilePath, caFilePath string) []string {
-	ver := DockerClientVersion
-	v, err := semver.Make(ver)
-	if err != nil {
-		Logger.Println("Cannot get semantic version of", ver)
-	}
-	v1_7, err := semver.Make("1.7.0")
-	v1_8, err := semver.Make("1.8.0")
-
 	daemonOpt := "daemon"
-	if v.LT(v1_8) {
-		daemonOpt = "-d"
-	}
-
-	userlandProxyOpt := ""
-	if v.GTE(v1_7) {
-		userlandProxyOpt = " --userland-proxy=false"
-	}
+	userlandProxyOpt := " --userland-proxy=false"
 
 	debugOpt := ""
 	if *FlagDebugMode {
