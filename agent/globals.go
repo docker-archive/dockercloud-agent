@@ -50,7 +50,7 @@ const (
 	ConfigFileName    = "dockercloud-agent.conf"
 	DockerBinaryName  = "docker"
 	DockerTarName     = "docker.tgz"
-	DockerTarSigName  = "docker.sig"
+	DockerTarSigName  = "docker.tgz.sig"
 	NgrokBinaryName   = "ngrok"
 	NgrokLogName      = "ngrok.log"
 	NgrokConfName     = "ngrok.conf"
