@@ -1,4 +1,4 @@
-FROM golang:1.4.2
+FROM golang:1.5.4
 
 # Install FPM for packaging
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -qy ruby ruby-dev rpm && \
