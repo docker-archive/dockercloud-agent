@@ -2,7 +2,7 @@
 
 AGENT_PIDFILE="/var/run/dockercloud-agent.pid"
 AGENT_NAME="dockercloud-agent"
-AGENT_BINARY=$(which $AGENT_BINARY_NAME)
+AGENT_BINARY=$(which $AGENT_NAME)
 
 
 get_distribution_type()
@@ -18,6 +18,8 @@ get_distribution_type()
             lsb_dist='fedora'
         elif [ -r /etc/centos-release ]; then
             lsb_dist='centos'
+        elif [ -r /etc/redhat-release ]; then
+            lsb_dist='rhel'
         elif [ -r /etc/os-release ]; then
             lsb_dist="$(. /etc/os-release && echo "$ID")"
         fi
@@ -41,17 +43,10 @@ get_agent_version()
     if [ $? -eq 0 ]; then
         echo ${ver}
     else
-        echo "unknow version, below 0.18.1"
+        echo "unknown version"
     fi
     unset ver
 }
-
-upgrade_on_ubuntu()
-{
-    apt-get update || true
-    apt-get install -y $AGENT_NAME
-}
-
 
 OLD_AGENT_VERSION=$(get_agent_version)
 AGENT_PID=$(get_agent_pid)
@@ -61,14 +56,26 @@ else
     echo "=> dockercloud-agent(${OLD_AGENT_VERSION}) is running with PID: unknown"
 fi
 
-case "$(get_distribution_type)" in
-    ubuntu)
-        echo "=> host operating system detected: ubuntu"
-        upgrade_on_ubuntu
+DISTRO="$(get_distribution_type)"
+case ${DISTRO} in
+    ubuntu|debian)
+        echo "=> host operating system detected: ${DISTRO}"
+        apt-get update || true
+        apt-get install -y ${AGENT_NAME}
+        ;;
+    centos|rhel)
+        echo "=> host operating system detected: ${DISTRO}"
+        yum check-update
+        yum install -y dockercloud-agent
+        ;;
+    fedora)
+        echo "=> host operating system detected: ${DISTRO}"
+        yum check-update
+        yum install -y --best --allowerasing dockercloud-agent
         ;;
     *)
-        echo "=> error: Cannot detect Linux distribution or it's unsupported"
-        exit 1
+        echo "=> error: Cannot detect Linux distribution (${DISTRO}), or it's unsupported"
+        exit 5
         ;;
 esac
 
@@ -84,5 +91,6 @@ else
         kill ${AGENT_PID}
     else
         echo "=> Please restart dockercloud-agent to apply the changes"
+        exit 2
     fi
 fi

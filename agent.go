@@ -1,4 +1,4 @@
-package main // import "github.com/tutumcloud/dockercloud-agent"
+package main // import "github.com/docker/dockercloud-agent"
 
 import (
 	"fmt"
@@ -8,8 +8,8 @@ import (
 	"syscall"
 	"time"
 
-	. "github.com/tutumcloud/dockercloud-agent/agent"
-	"github.com/tutumcloud/dockercloud-agent/utils"
+	. "github.com/docker/dockercloud-agent/agent"
+	"github.com/docker/dockercloud-agent/utils"
 )
 
 func init() {
@@ -17,19 +17,18 @@ func init() {
 }
 
 func main() {
-	dockerBinPath := path.Join(DockerDir, DockerBinaryName)
-	dockerNewBinPath := path.Join(DockerDir, DockerNewBinaryName)
-	dockerNewBinSigPath := path.Join(DockerDir, DockerNewBinarySigName)
+	dockerBinPath := path.Join(DockerHome, DockerBinaryName)
+	dockerTarPath := path.Join(AgentLibHome, DockerTarName)
+	dockerTarSigPath := path.Join(AgentLibHome, DockerTarSigName)
 	configFilePath := path.Join(AgentHome, ConfigFileName)
 	keyFilePath := path.Join(AgentHome, KeyFileName)
 	certFilePath := path.Join(AgentHome, CertFileName)
 	caFilePath := path.Join(AgentHome, CAFileName)
-	ngrokPath := path.Join(DockerDir, NgrokBinaryName)
 	ngrokLogPath := path.Join(LogDir, NgrokLogName)
 	ngrokConfPath := path.Join(AgentHome, NgrokConfName)
 
 	_ = os.MkdirAll(AgentHome, 0755)
-	_ = os.MkdirAll(DockerDir, 0755)
+	_ = os.MkdirAll(AgentLibHome, 0755)
 	_ = os.MkdirAll(LogDir, 0755)
 
 	ParseFlag()
@@ -67,10 +66,6 @@ func main() {
 		CreateCerts(keyFilePath, certFilePath, Conf.CertCommonName)
 	}
 
-	if utils.FileExist(dockerBinPath) {
-		DockerClientVersion = GetDockerClientVersion(dockerBinPath)
-	}
-
 	if !*FlagStandalone {
 		Logger.Printf("Registering in Docker Cloud via PATCH: %s",
 			regUrl+Conf.UUID)
@@ -88,7 +83,7 @@ func main() {
 			RegPost(regUrl, caFilePath, configFilePath)
 
 			CreateCerts(keyFilePath, certFilePath, Conf.CertCommonName)
-			DownloadDocker(DockerBinaryURL, dockerBinPath)
+			DownloadDocker(DockerTarURL, DockerHome)
 
 			Logger.Printf("Registering in Docker Cloud via PATCH: %s",
 				regUrl+Conf.UUID)
@@ -103,8 +98,9 @@ func main() {
 		Logger.Fatalln(err)
 	}
 
-	DownloadDocker(DockerBinaryURL, dockerBinPath)
-	CreateDockerSymlink(dockerBinPath, DockerSymbolicLink)
+	DownloadDocker(DockerTarURL, DockerHome)
+	Logger.Print("Found docker: version ", GetDockerClientVersion(dockerBinPath))
+
 	HandleSig()
 	syscall.Setpriority(syscall.PRIO_PROCESS, os.Getpid(), RenicePriority)
 
@@ -116,8 +112,10 @@ func main() {
 			Logger.Println("Skip NAT tunnel")
 		} else {
 			Logger.Println("Loading NAT tunnel module")
-			go NatTunnel(regUrl, ngrokPath, ngrokLogPath, ngrokConfPath, Conf.UUID)
+			go NatTunnel(regUrl, AgentLibHome, ngrokLogPath, ngrokConfPath, Conf.UUID)
 		}
+	} else {
+		DownloadNgrok(NgrokTarURL, AgentLibHome)
 	}
 
 	if !*FlagStandalone {
@@ -128,7 +126,7 @@ func main() {
 	Logger.Println("Docker server started. Entering maintenance loop")
 	for {
 		time.Sleep(HeartBeatInterval * time.Second)
-		UpdateDocker(dockerBinPath, dockerNewBinPath, dockerNewBinSigPath, keyFilePath, certFilePath, caFilePath)
+		UpdateDocker(DockerHome, dockerTarPath, dockerTarSigPath, keyFilePath, certFilePath, caFilePath)
 
 		// try to restart docker daemon if it dies somehow
 		if DockerProcess == nil {

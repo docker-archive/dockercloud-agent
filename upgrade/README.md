@@ -1,4 +1,4 @@
 Usage
 =====
 
-    docker -d -v /:/rootfs --pid=host --privileged tutum/upgrade-dockercloud-agent
+    docker run -d -v /:/rootfs --pid=host --privileged dockercloud/agent:upgrade

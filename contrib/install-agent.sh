@@ -10,7 +10,7 @@ GPG_KEY_URL=https://files.cloud.docker.com/keys/$GPG_KEY_ID.pub
 GPG_KEY_PACKAGE_URL=https://files.cloud.docker.com/keys/$GPG_KEY_PACKAGE_ID.pub
 REPO=${REPO:-repo.cloud.docker.com}
 HOST=${HOST:-https://cloud.docker.com/}
-SUPPORT_URL=http://go.tutum.co/support-byon
+SUPPORT_URL=https://docs.docker.com/docker-cloud/tutorials/byoh/
 export DEBIAN_FRONTEND=noninteractive
 
 
@@ -69,7 +69,7 @@ case "$(get_distribution_type)" in
 			echo "!! Failed to install linux-image-extra package. AUFS support (which is recommended) may not be available."
 		echo "-> Installing dockercloud-agent..."
 		echo deb [arch=amd64] http://$REPO/ubuntu/ dockercloud main > /etc/apt/sources.list.d/dockercloud.list
-		apt-get update -qq -o Dir::Etc::sourceparts="/dev/null" -o APT::List-Cleanup=0 -o Dir::Etc::sourcelist="sources.list.d/dockercloud.list" && apt-get install -yq dockercloud-agent
+		apt-get update -qq -o Dir::Etc::sourceparts="/dev/null" -o APT::List-Cleanup=0 -o Dir::Etc::sourcelist="sources.list.d/dockercloud.list" && apt-get install -q dockercloud-agent
 		;;
 	fedora|centos|rhel)
 		echo "-> Adding Docker Cloud's GPG key..."

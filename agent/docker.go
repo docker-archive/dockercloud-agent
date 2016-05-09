@@ -3,6 +3,7 @@ package agent
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
@@ -12,55 +13,38 @@ import (
 	"syscall"
 	"time"
 
-	"code.google.com/p/go-shlex"
-	"github.com/blang/semver"
-	"github.com/tutumcloud/dockercloud-agent/utils"
+	"github.com/docker/dockercloud-agent/utils"
+	"github.com/flynn-archive/go-shlex"
 )
 
-func DownloadDocker(url, dockerBinPath string) {
-	if !utils.FileExist(dockerBinPath) {
+func DownloadDocker(url, dockerHome string) {
+	if !utils.FileExist(path.Join(dockerHome, DockerBinaryName)) {
 		Logger.Println("Downloading docker binary...")
-		downloadFile(url, dockerBinPath, "docker")
+		downloadFile(url, dockerHome, "docker")
 	}
 }
 
 func GetDockerClientVersion(dockerBinPath string) (version string) {
 	var versionStr string
-	out, err := exec.Command("docker", "-v").Output()
+	out, err := exec.Command(dockerBinPath, "-v").Output()
 	if err != nil {
 		SendError(err, "Failed to get the docker version", nil)
 	}
 	versionStr = string(out)
 
 	if versionStr != "" {
-		re := regexp.MustCompile("(\\d+\\.\\d+)\\.\\d+")
+		re := regexp.MustCompile("\\d+\\.\\d+\\.\\d+[a-zA-Z0-9_\\-]*")
 		match := re.FindStringSubmatch(versionStr)
 		if match != nil && len(match) > 0 {
 			version = match[0]
 		}
 	}
-	Logger.Print("Found docker: version ", version)
 	return
 }
 
 func getDockerStartOpt(dockerBinPath, keyFilePath, certFilePath, caFilePath string) []string {
-	ver := GetDockerClientVersion(dockerBinPath)
-	v, err := semver.Make(ver)
-	if err != nil {
-		Logger.Println("Cannot get semantic version of", ver)
-	}
-	v1_7, err := semver.Make("1.7.0")
-	v1_8, err := semver.Make("1.8.0")
-
 	daemonOpt := "daemon"
-	if v.LT(v1_8) {
-		daemonOpt = "-d"
-	}
-
-	userlandProxyOpt := ""
-	if v.GTE(v1_7) {
-		userlandProxyOpt = " --userland-proxy=false"
-	}
+	userlandProxyOpt := " --userland-proxy=false"
 
 	debugOpt := ""
 	if *FlagDebugMode {
@@ -110,71 +94,66 @@ func StopDocker() {
 	}
 }
 
-func UpdateDocker(dockerBinPath, dockerNewBinPath, dockerNewBinSigPath, keyFilePath, certFilePath, caFilePath string) {
-	if utils.FileExist(dockerNewBinPath) {
-		Logger.Printf("New Docker binary (%s) found", dockerNewBinPath)
+func UpdateDocker(dockerHome, dockerTarPath, dockerTarSigPath, keyFilePath, certFilePath, caFilePath string) {
+	dockerBinPath := path.Join(dockerHome, DockerBinaryName)
+	defer func() {
+		if err := recover(); err != nil {
+			Logger.Println("Cannot uncomporess the tar file. The update is rejected")
+			removeUpdateFiles(dockerTarPath, dockerTarSigPath)
+			ScheduleToTerminateDocker = false
+			StartDocker(dockerBinPath, keyFilePath, certFilePath, caFilePath)
+		}
+	}()
+	if utils.FileExist(dockerTarPath) {
+		Logger.Printf("New docker update (%s) found", dockerTarPath)
 		Logger.Println("Updating docker...")
-		if verifyDockerSig(dockerNewBinPath, dockerNewBinSigPath) {
+		if verifyDockerSig(dockerTarPath, dockerTarSigPath) {
 			Logger.Println("Stopping docker daemon")
 			ScheduleToTerminateDocker = true
 			StopDocker()
-			Logger.Println("Removing old docker binary")
-			if err := os.RemoveAll(dockerBinPath); err != nil {
-				SendError(err, "Failed to remove the old docker binary", nil)
-				Logger.Println("Cannot remove old docker binary:", err)
+
+			Logger.Println("Applying new docker update")
+			tarfile, err := ioutil.ReadFile(dockerTarPath)
+			if err != nil {
+				SendError(err, "Failed to read the docker update file", nil)
+				Logger.Println("Failed read the docker update file:", err)
 			}
-			Logger.Println("Renaming new docker binary")
-			if err := os.Rename(dockerNewBinPath, dockerBinPath); err != nil {
-				SendError(err, "Failed to rename the docker binary", nil)
-				Logger.Println("Cannot rename docker binary:", err)
-			}
-			Logger.Println("Removing the signature file", dockerNewBinSigPath)
-			if err := os.RemoveAll(dockerNewBinSigPath); err != nil {
-				SendError(err, "Failed to remove the docker sig file", nil)
-				Logger.Println(err)
-			}
-			CreateDockerSymlink(dockerBinPath, DockerSymbolicLink)
+			uncompress(tarfile, dockerHome)
+			removeUpdateFiles(dockerTarPath, dockerTarSigPath)
 			ScheduleToTerminateDocker = false
 			StartDocker(dockerBinPath, keyFilePath, certFilePath, caFilePath)
 			Logger.Println("Docker binary updated successfully")
 		} else {
-			Logger.Println("Cannot verify signature. Rejecting update")
-			Logger.Println("Removing the invalid docker binary", dockerNewBinPath)
-			if err := os.RemoveAll(dockerNewBinPath); err != nil {
-				SendError(err, "Failed to remove the invalid docker binary", nil)
-				Logger.Println(err)
-			}
-			Logger.Println("Removing the invalid signature file", dockerNewBinSigPath)
-			if err := os.RemoveAll(dockerNewBinSigPath); err != nil {
-				SendError(err, "Failed to remove the invalid docker sig file", nil)
-				Logger.Println(err)
-			}
+			Logger.Println("Cannot verify signature. The update is rejected")
+			removeUpdateFiles(dockerTarPath, dockerTarSigPath)
 			Logger.Println("Failed to update docker binary")
 		}
 	}
 }
 
+func removeUpdateFiles(dockerTarPath, dockerTarSigPath string) {
+	Logger.Println("Removing the invalid docker update file", dockerTarPath)
+	if err := os.RemoveAll(dockerTarPath); err != nil {
+		SendError(err, "Failed to remove the invalid docker update file", nil)
+		Logger.Println(err)
+	}
+	Logger.Println("Removing the invalid signature file", dockerTarSigPath)
+	if err := os.RemoveAll(dockerTarSigPath); err != nil {
+		SendError(err, "Failed to remove the invalid docker sig file", nil)
+		Logger.Println(err)
+	}
+}
+
 func verifyDockerSig(dockerNewBinPath, dockerNewBinSigPath string) bool {
 	cmd := exec.Command("gpg", "--verify", dockerNewBinSigPath, dockerNewBinPath)
-	err := cmd.Run()
+	out, err := cmd.CombinedOutput()
 	if err != nil {
 		SendError(err, "GPG verification failed", nil)
-		Logger.Println("GPG verification failed:", err)
+		Logger.Printf("GPG verification failed: %s, %s", err, string(out))
 		return false
 	}
 	Logger.Println("GPG verification passed")
 	return true
-}
-
-func CreateDockerSymlink(dockerBinPath, dockerSymbolicLink string) {
-	if err := os.RemoveAll(DockerSymbolicLink); err != nil {
-		SendError(err, "Failed to remove the old docker symbolic link", nil)
-		Logger.Println(err)
-	}
-	if err := os.Symlink(dockerBinPath, DockerSymbolicLink); err != nil {
-		SendError(err, "Failed to create docker symbolic link", nil)
-		Logger.Println(err)
-	}
 }
 
 func runDocker(cmd *exec.Cmd) {

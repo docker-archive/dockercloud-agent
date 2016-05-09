@@ -8,11 +8,12 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"path"
 	"strings"
 	"time"
 
 	"github.com/ActiveState/tail"
-	"github.com/tutumcloud/dockercloud-agent/utils"
+	"github.com/docker/dockercloud-agent/utils"
 )
 
 type TunnelPatchForm struct {
@@ -24,7 +25,8 @@ type ReachableForm struct {
 	Reachable bool `json:"reachable"`
 }
 
-func NatTunnel(url, ngrokPath, ngrokLogPath, ngrokConfPath, uuid string) {
+func NatTunnel(url, ngrokHome, ngrokLogPath, ngrokConfPath, uuid string) {
+	ngrokPath := path.Join(ngrokHome, NgrokBinaryName)
 	if isNodeReachable(url, uuid) {
 		Logger.Printf("Node %s is publicly reachable", Conf.CertCommonName)
 		return
@@ -32,10 +34,7 @@ func NatTunnel(url, ngrokPath, ngrokLogPath, ngrokConfPath, uuid string) {
 		Logger.Printf("Node %s is NOT publicly reachable", Conf.CertCommonName)
 	}
 
-	if !utils.FileExist(ngrokPath) {
-		Logger.Println("Cannot find ngrok binary at", ngrokPath)
-		DownloadNgrok(NgrokBinaryURL, ngrokPath)
-	}
+	DownloadNgrok(NgrokTarURL, ngrokHome)
 
 	updateNgrokHost(url)
 	createNgrokConfFile(ngrokConfPath)
@@ -117,7 +116,8 @@ func patchTunnel(url, tunnel string) {
 	}
 
 	headers := []string{"Authorization TutumAgentToken " + Conf.Token,
-		"Content-Type", "application/json"}
+		"Content-Type", "application/json",
+		"User-Agent dockercloud-agent/" + VERSION}
 	_, err = SendRequest("PATCH", utils.JoinURL(url, Conf.UUID), data, headers)
 	if err != nil {
 		SendError(err, "Failed to patch tunnel address to Docker Cloud", nil)
@@ -126,10 +126,10 @@ func patchTunnel(url, tunnel string) {
 	Logger.Println("New tunnel has been set up")
 }
 
-func DownloadNgrok(url, ngrokBinPath string) {
-	if !utils.FileExist(ngrokBinPath) {
+func DownloadNgrok(url, ngrokHome string) {
+	if !utils.FileExist(path.Join(ngrokHome, NgrokBinaryName)) {
 		Logger.Println("Downloading NAT tunnel binary ...")
-		downloadFile(url, ngrokBinPath, "ngrok")
+		downloadFile(url, ngrokHome, "ngrok")
 	}
 }
 
@@ -206,7 +206,7 @@ func isNodeReachable(url, uuid string) bool {
 			}
 		}
 		SendError(err, "Node reachable check HTTP error", nil)
-		Logger.Printf("Node reachable check failed, %s. Retry in %d seconds", err, i)
+		Logger.Printf("Node reachable check failed, error code:%s. Retry in %d seconds", err, i)
 		time.Sleep(time.Duration(i) * time.Second)
 	}
 }
