@@ -29,7 +29,7 @@ var (
 )
 
 const (
-	VERSION               = "1.0.1-dev"
+	VERSION               = "1.1.0"
 	defaultCertCommonName = ""
 	defaultDockerHost     = "tcp://0.0.0.0:2375"
 	defaultAgentHost      = "https://cloud.docker.com/"
