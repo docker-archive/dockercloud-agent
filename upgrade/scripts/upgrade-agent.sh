@@ -90,7 +90,7 @@ else
         echo "=> killing the current dockercloud-agent process, and it will be restarted by upstart/systemd/sysmvinit"
         echo "=> NOTICE: you might have to restart your stopped containers if they are launched without autorestart option"
         kill ${AGENT_PID}
-        exit 3
+        exit 0
     else
         echo "=> Please restart dockercloud-agent to apply the changes"
         exit 4
