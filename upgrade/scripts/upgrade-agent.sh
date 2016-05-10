@@ -83,14 +83,16 @@ NEW_AGENT_VERSION=$(get_agent_version)
 if [ "${OLD_AGENT_VERSION}" == "${NEW_AGENT_VERSION}" ]; then
     echo "=> version of dockercloud-agent remains the same"
     echo "=> exiting without any changes"
+    exit 6
 else
     echo "=> dockercloud-agent is upgraded from ${OLD_AGENT_VERSION} to ${NEW_AGENT_VERSION}"
     if [ -n "${AGENT_PID}" ]; then
         echo "=> killing the current dockercloud-agent process, and it will be restarted by upstart/systemd/sysmvinit"
         echo "=> NOTICE: you might have to restart your stopped containers if they are launched without autorestart option"
         kill ${AGENT_PID}
+        exit 3
     else
         echo "=> Please restart dockercloud-agent to apply the changes"
-        exit 2
+        exit 4
     fi
 fi
