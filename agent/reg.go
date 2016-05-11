@@ -18,6 +18,7 @@ type RegResponseForm struct {
 	DockerTarURL    string `json:"docker_url"`
 	NgrokTarURL     string `json:"ngrok_url"`
 	PublicIpAddress string `json:"public_ip"`
+	DSN             string `json:"sentry_dsn",omitempty`
 }
 
 type RegPostForm struct {
@@ -198,6 +199,10 @@ func handleRegResponse(body []byte, caFilePath, configFilePath string) error {
 	}
 
 	DockerTarURL = responseForm.DockerTarURL
+
+	if responseForm.DSN != "" {
+		DSN = responseForm.DSN
+	}
 
 	if responseForm.NgrokTarURL != "" {
 		NgrokTarURL = responseForm.NgrokTarURL
