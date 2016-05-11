@@ -114,8 +114,6 @@ func main() {
 			Logger.Println("Loading NAT tunnel module")
 			go NatTunnel(regUrl, AgentLibHome, ngrokLogPath, ngrokConfPath, Conf.UUID)
 		}
-	} else {
-		DownloadNgrok(NgrokTarURL, AgentLibHome)
 	}
 
 	if !*FlagStandalone {
