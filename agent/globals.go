@@ -26,6 +26,7 @@ var (
 	DockerTarURL              = ""
 	NgrokTarURL               = ""
 	NgrokHost                 = ""
+	DSN                       = ""
 )
 
 const (
