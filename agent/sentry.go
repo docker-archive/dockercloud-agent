@@ -5,7 +5,6 @@ import (
 )
 
 var sentryClient *raven.Client = nil
-var DSN string
 
 func getSentryClient() *raven.Client {
 	if sentryClient == nil && DSN != "" {
