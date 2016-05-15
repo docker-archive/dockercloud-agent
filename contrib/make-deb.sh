@@ -98,7 +98,7 @@ EOF
       --after-install $DEST/postinst \
       --before-remove $DEST/prerm \
       --after-remove $DEST/postrm \
-      --architecture "$PACKAGE_ARCHITECTURE" \
+      --architecture "armhf" \
       --prefix / \
       --description "$PACKAGE_DESCRIPTION" \
       --maintainer "$PACKAGE_MAINTAINER" \
