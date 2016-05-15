@@ -5,7 +5,7 @@ DEST=$1
 
 VERSION=$(cat VERSION)
 PKGVERSION="${VERSION:-latest}"
-PACKAGE_ARCHITECTURE="${ARCHITECTURE:-amd64}"
+PACKAGE_ARCHITECTURE="${ARCHITECTURE:-arm}"
 PACKAGE_URL="https://cloud.docker.com/"
 PACKAGE_MAINTAINER="support@docker.com"
 PACKAGE_DESCRIPTION="Agent to manage Docker hosts through Docker Cloud"
