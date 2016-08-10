@@ -27,6 +27,7 @@ var (
 	NgrokTarURL               = ""
 	NgrokHost                 = ""
 	DSN                       = ""
+	DISTRO	                  = ""
 )
 
 const (
