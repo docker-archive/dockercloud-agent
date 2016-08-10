@@ -10,6 +10,8 @@ import (
 
 	. "github.com/docker/dockercloud-agent/agent"
 	"github.com/docker/dockercloud-agent/utils"
+	"os/exec"
+	"strings"
 )
 
 func init() {
@@ -41,6 +43,8 @@ func main() {
 	Logger.Print("Running dockercloud-agent: version ", VERSION)
 	CreatePidFile(AgentPidFile)
 
+	DISTRO = GetOsDistro("/etc/os-release")
+	Logger.Print("OS distro: ", DISTRO)
 	PrepareFiles(configFilePath, dockerBinPath, keyFilePath, certFilePath)
 	SetConfigFile(configFilePath)
 
@@ -176,4 +180,24 @@ func PrepareFiles(configFilePath, dockerBinPath, keyFilePath, certFilePath strin
 		Logger.Printf("Override 'DockerOpts' from command line flag: %s\n", *FlagDockerOpts)
 		Conf.DockerOpts = *FlagDockerOpts
 	}
+}
+
+func GetOsDistro(release string) string {
+	cmd := exec.Command("sh", "-c", "echo $(. /etc/os-release && echo $ID)")
+	id, err := cmd.Output()
+	if err != nil{
+		Logger.Println(err)
+		id = []byte("unknown")
+	}
+	cmd = exec.Command("sh", "-c", "echo $(. /etc/os-release && echo $VERSION_ID)")
+	version, err := cmd.Output()
+	if err != nil{
+		Logger.Println(err)
+		version = []byte("unknown")
+	}
+	distro := fmt.Sprintf("%s/%s", strings.TrimSpace(string(id)), strings.TrimSpace(string(version)))
+	if distro == "/"{
+		distro = "unknown/unknown"
+	}
+	return distro
 }
