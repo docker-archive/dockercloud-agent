@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -ex
 
-DOCKER_VERSIONS=1.11.1-cs1
+DOCKER_VERSIONS="1.11.1-cs1 1.11.2-cs4"
 
 
 function process_rpm() {
@@ -14,6 +14,7 @@ function process_rpm() {
     mkdir build
     mv docker-${2}.tgz* build/
     cd build
+    gpg2 -s -b -u ${GPG_UID} docker-${2}.tgz
     ls -la
     aws s3 sync ./ s3://$S3_BUCKET${3} --acl public-read --region us-east-1
 }
@@ -37,6 +38,7 @@ function process_deb() {
     mkdir build
     mv docker-${2}.tgz* build/
     cd build
+    gpg2 -s -b -u ${GPG_UID} docker-${2}.tgz
     ls -la
     aws s3 sync ./ s3://$S3_BUCKET${3} --acl public-read --region us-east-1
 }
@@ -79,7 +81,18 @@ for version in ${DOCKER_VERSIONS}; do
         cd $(mktemp -d)
         DEB_NAME=docker-engine_$(echo ${version} | tr '-' '~')-0~${ubuntu_version}_amd64.deb
         curl -O https://s3.amazonaws.com/packages.docker.com/${version:0:4}/apt/repo/pool/main/d/docker-engine/${DEB_NAME}
-        process_deb ${DEB_NAME} ${version} /packages/docker/ubuntu/${ubuntu_version}/
+
+        case "${ubuntu_version}" in
+        precise) ubuntu_version_num=12.04
+                ;;
+        trusty) ubuntu_version_num=14.04
+                ;;
+        xenial) ubuntu_version_num=16.04
+                ;;
+        *) exit 1
+           ;;
+        esac
+        process_deb ${DEB_NAME} ${version} /packages/docker/ubuntu/${ubuntu_version_num}/
     done
 
     # Debian
@@ -87,6 +100,15 @@ for version in ${DOCKER_VERSIONS}; do
         cd $(mktemp -d)
         DEB_NAME=docker-engine_$(echo ${version} | tr '-' '~')-0~${debian_version}_amd64.deb
         curl -O https://s3.amazonaws.com/packages.docker.com/${version:0:4}/apt/repo/pool/main/d/docker-engine/${DEB_NAME}
-        process_deb ${DEB_NAME} ${version} /packages/docker/debian/${debian_version}/
+
+        case "${debian_version}" in
+        wheezy) debian_version_num=7
+                ;;
+        jessie) debian_version_num=8
+                ;;
+        *) exit 1
+           ;;
+        esac
+        process_deb ${DEB_NAME} ${version} /packages/docker/debian/${debian_version_num}/
     done
 done
