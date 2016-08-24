@@ -1,4 +1,4 @@
-Uploads dynamic Docker binaries to S3 for distribution.
+Uploads Docker binaries to S3 for distribution.
 
 **Note:** only to be used by authorized users.
 

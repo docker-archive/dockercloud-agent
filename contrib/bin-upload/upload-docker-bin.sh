@@ -4,19 +4,23 @@ set -ex
 DOCKER_VERSIONS="1.11.1-cs1 1.11.2-cs4"
 
 
+function process_tgz() {
+    sha256sum ${1} > ${1}.sha256
+    md5sum ${1} > ${1}.md5
+    gpg2 -s -b -u ${GPG_UID} ${1}
+    mkdir build
+    mv ${1}* build/
+    cd build
+    ls -la
+    aws s3 sync ./ s3://$S3_BUCKET${2} --acl public-read --region us-east-1
+}
+
 function process_rpm() {
     rpm2cpio ./${1} | cpio -idmv
     cd ./usr
     mv bin docker
     tar czvf docker-${2}.tgz docker
-    sha256sum docker-${2}.tgz > docker-${2}.tgz.sha256
-    md5sum docker-${2}.tgz > docker-${2}.tgz.md5
-    mkdir build
-    mv docker-${2}.tgz* build/
-    cd build
-    gpg2 -s -b -u ${GPG_UID} docker-${2}.tgz
-    ls -la
-    aws s3 sync ./ s3://$S3_BUCKET${3} --acl public-read --region us-east-1
+    process_tgz docker-${2}.tgz ${3}
 }
 
 function process_deb() {
@@ -33,17 +37,16 @@ function process_deb() {
     cd ./usr
     mv bin docker
     tar czvf docker-${2}.tgz docker
-    sha256sum docker-${2}.tgz > docker-${2}.tgz.sha256
-    md5sum docker-${2}.tgz > docker-${2}.tgz.md5
-    mkdir build
-    mv docker-${2}.tgz* build/
-    cd build
-    gpg2 -s -b -u ${GPG_UID} docker-${2}.tgz
-    ls -la
-    aws s3 sync ./ s3://$S3_BUCKET${3} --acl public-read --region us-east-1
+    process_tgz docker-${2}.tgz ${3}
 }
 
 for version in ${DOCKER_VERSIONS}; do
+    # Static binaries
+    cd $(mktemp -d)
+    TGZ_NAME=docker-${version}.tgz
+    curl -O https://s3.amazonaws.com/packages.docker.com/${version:0:4}/builds/linux/amd64/${TGZ_NAME}
+    process_tgz ${TGZ_NAME} /packages/docker/
+
     # CentOS 7
     for centos_version in 7; do
         cd $(mktemp -d)
