@@ -18,17 +18,19 @@ type RegResponseForm struct {
 	DockerTarURL    string `json:"docker_url"`
 	NgrokTarURL     string `json:"ngrok_url"`
 	PublicIpAddress string `json:"public_ip"`
-	DSN             string `json:"sentry_dsn",omitempty`
+	DSN             string `json:"sentry_dsn, omitempty"`
 }
 
 type RegPostForm struct {
 	AgentVersion string `json:"agent_version"`
+	Distro       string `json:"distro"`
 }
 
 type RegPatchForm struct {
 	Public_cert   string `json:"public_cert"`
 	AgentVersion  string `json:"agent_version"`
 	DockerVersion string `json:"docker_version,omitempty"`
+	Distro        string `json:"distro"`
 }
 
 type RegGetForm struct {
@@ -48,6 +50,7 @@ type RegGetForm struct {
 func RegPost(url, caFilePath, configFilePath string) error {
 	form := RegPostForm{}
 	form.AgentVersion = VERSION
+	form.Distro = DISTRO
 	data, err := json.Marshal(form)
 	if err != nil {
 		SendError(err, "Fatal: Json marshal error", nil)
@@ -61,6 +64,7 @@ func RegPatch(url, caFilePath, certFilePath, configFilePath string) error {
 	form := RegPatchForm{}
 	form.AgentVersion = VERSION
 	form.DockerVersion = GetDockerClientVersion(path.Join(DockerHome, DockerBinaryName))
+	form.Distro = DISTRO
 	cert, err := GetCertificate(certFilePath)
 	if err != nil {
 		SendError(err, "Fatal: Failed to load public certificate", nil)
