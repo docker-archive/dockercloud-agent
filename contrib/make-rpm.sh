@@ -114,6 +114,8 @@ EOF
       --depends libcgroup \
       --depends libpthread.so.0 \
       --depends libsqlite3.so.0 \
+      --depends "libltdl.so.7()(64bit)" \
+      --depends "libseccomp.so.2()(64bit)" \
       --depends tar \
       --depends xz \
       --depends "device-mapper-libs >= 1.02.90-1" \
