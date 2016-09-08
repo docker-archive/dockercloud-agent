@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -ex
 
-DOCKER_VERSIONS="1.11.1-cs1 1.11.2-cs4"
+DOCKER_VERSIONS="${DOCKER_VERSIONS:-1.11.1-cs1 1.11.2-cs5}"
 
 
 function process_tgz() {
