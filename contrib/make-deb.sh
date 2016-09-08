@@ -117,6 +117,8 @@ EOF
       --depends gnupg \
       --depends "sysv-rc >= 2.88dsf-24" \
       --depends xz-utils \
+      --depends libsystemd-journal0 \
+      --depends libltdl7 \
       --provides dockercloud-agent \
       --replaces dockercloud-agent \
       --url "$PACKAGE_URL" \
