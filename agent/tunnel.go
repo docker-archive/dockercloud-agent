@@ -120,7 +120,6 @@ func patchTunnel(url, tunnel string) {
 		"User-Agent dockercloud-agent/" + VERSION}
 	_, err = SendRequest("PATCH", utils.JoinURL(url, Conf.UUID), data, headers)
 	if err != nil {
-		SendError(err, "Failed to patch tunnel address to Docker Cloud", nil)
 		Logger.Println("Failed to patch tunnel address to Docker Cloud,", err)
 	}
 	Logger.Println("New tunnel has been set up")
@@ -150,7 +149,6 @@ func updateNgrokHost(url string) {
 		"Content-Type application/json"}
 	body, err := SendRequest("GET", utils.JoinURL(url, Conf.UUID), nil, headers)
 	if err != nil {
-		SendError(err, "SendRequest error", nil)
 		Logger.Printf("Get registration info error, %s", err)
 	} else {
 		var form RegGetForm
@@ -205,7 +203,6 @@ func isNodeReachable(url, uuid string) bool {
 				return reachableForm.Reachable
 			}
 		}
-		SendError(err, "Node reachable check HTTP error", nil)
 		Logger.Printf("Node reachable check failed, error code:%s. Retry in %d seconds", err, i)
 		time.Sleep(time.Duration(i) * time.Second)
 	}
