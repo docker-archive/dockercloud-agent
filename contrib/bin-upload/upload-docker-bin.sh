@@ -55,6 +55,14 @@ for version in ${DOCKER_VERSIONS}; do
         process_rpm ${RPM_NAME} ${version} /packages/docker/centos/${centos_version}/
     done
 
+    # Red Hat 7
+    for redhat_version in 7; do
+        cd $(mktemp -d)
+        RPM_NAME=docker-engine-$(echo ${version} | tr '-' '.')-1.el${redhat_version}.centos.x86_64.rpm
+        curl -O https://s3.amazonaws.com/packages.docker.com/${version:0:4}/yum/repo/main/centos/${redhat_version}/Packages/${RPM_NAME}
+        process_rpm ${RPM_NAME} ${version} /packages/docker/rhel/${redhat_version}/
+    done
+
     # Fedora
     for fedora_version in 21 22 23; do
         cd $(mktemp -d)
