@@ -89,7 +89,6 @@ func SendRequest(method, url string, data_bytes []byte, headers []string) ([]byt
 func HttpGet(url string) ([]byte, error) {
 	resp, err := http.Get(url)
 	if err != nil {
-		SendError(err, "HTTP get error", nil)
 		return nil, err
 	}
 	defer resp.Body.Close()
@@ -135,7 +134,6 @@ func getTargetDef(url string) (*TargetDef, error) {
 	var def TargetDef
 	body, err := HttpGet(url)
 	if err != nil {
-		SendError(err, "HTTP get error", nil)
 		return nil, err
 	}
 	if err = json.Unmarshal(body, &def); err != nil {
@@ -169,7 +167,6 @@ func downloadTarget(def *TargetDef) []byte {
 func getTarget(def *TargetDef) ([]byte, error) {
 	b, err := HttpGet(def.Download_url)
 	if err != nil {
-		SendError(err, "HTTP get error", nil)
 		return nil, err
 	}
 
@@ -179,7 +176,6 @@ func getTarget(def *TargetDef) ([]byte, error) {
 	md5s := hex.EncodeToString(md5hasher.Sum(nil))
 	md5b, err := HttpGet(def.Checksum_md5_url)
 	if err != nil {
-		SendError(err, "HTTP get error", nil)
 		Logger.Println("Failed to get md5 for the target")
 		return nil, err
 	} else {
@@ -195,7 +191,6 @@ func getTarget(def *TargetDef) ([]byte, error) {
 	sha256s := hex.EncodeToString(sha256hasher.Sum(nil))
 	sha256b, err := HttpGet(def.Checksum_sha256_url)
 	if err != nil {
-		SendError(err, "HTTP error", nil)
 		Logger.Println("Failed to get sha256 for the target")
 		return nil, err
 	} else {

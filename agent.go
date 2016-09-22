@@ -92,7 +92,7 @@ func main() {
 			Logger.Printf("Registering in Docker Cloud via PATCH: %s",
 				regUrl+Conf.UUID)
 			if err = RegPatch(regUrl, caFilePath, certFilePath, configFilePath); err != nil {
-				SendError(err, "Registion HTTP error", nil)
+				Logger.Print( "Registion HTTP error: ", err)
 			}
 		}
 	}

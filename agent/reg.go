@@ -88,7 +88,6 @@ func VerifyRegistration(url string) {
 		"User-Agent dockercloud-agent/" + VERSION}
 	body, err := SendRequest("GET", utils.JoinURL(url, Conf.UUID), nil, headers)
 	if err != nil {
-		SendError(err, "SendRequest error", nil)
 		Logger.Printf("Get registration info error, %s", err)
 	} else {
 		var form RegGetForm
@@ -107,7 +106,6 @@ func VerifyRegistration(url string) {
 
 	body, err = SendRequest("GET", utils.JoinURL(url, Conf.UUID), nil, headers)
 	if err != nil {
-		SendError(err, "Failed to get registration info after 5 minutes", nil)
 		Logger.Printf("Get registration info error, %s", err)
 	} else {
 		var form RegGetForm
@@ -147,7 +145,6 @@ func register(url, method, token, uuid, caFilePath, configFilePath string, data 
 			}
 		}
 		if method == "POST" && (err.Error() == "401") {
-			SendError(err, "Registration unauthorized: POST", nil)
 			Logger.Print("Cannot register node in Docker Cloud: unauthorized. Please try again with a new token.")
 			Logger.Print("Removing the invalid token from config file")
 			os.RemoveAll(AgentPidFile)
@@ -162,7 +159,6 @@ func register(url, method, token, uuid, caFilePath, configFilePath string, data 
 		if method == "PATCH" && (err.Error() == "404" || err.Error() == "401") {
 			return err
 		}
-		SendError(err, "Registration HTTP error", nil)
 		Logger.Printf("Registration failed, %s. Retry in %d seconds", err, i)
 		time.Sleep(time.Duration(i) * time.Second)
 	}
