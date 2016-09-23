@@ -6,7 +6,7 @@ dockercloud-agent
 
 This is the agent Docker Cloud uses to set up nodes. It's a daemon that will register the host with the DockerCloud API using a user token (`Token`), and will manage the installation, configuration and ongoing upgrade of the Docker daemon.
 
-For information on how to install it in your host, please check the [Bring Your Own Node](http://go.tutum.co/support-byon) documentation.
+For information on how to install it in your host, please check the [Bring Your Own Node](https://docs.docker.com/docker-cloud/infrastructure/byoh/) documentation.
 
 
 ## Running
@@ -75,7 +75,7 @@ Run `make` to build binaries and `.deb` and `.rpm` packages which will be stored
 
 # Proxy
 
-If `HTTP_PROXY` and `HTTPS_PRXOY` is defined, tutum-agent will read and use them. (this is supported by golang natively) 
+If `HTTP_PROXY` and `HTTPS_PRXOY` is defined, cloud-agent will read and use them. (this is supported by golang natively)
 
 ## Supported Distributions
 
@@ -90,4 +90,4 @@ Currently supported and tested on:
 
 ## Reporting security issues
 
-In order to report a security issue, please send us an email to [security@docker.com](mailto:security@docker.com). Thank you!
+To report a security issue, please send us an email to [security@docker.com](mailto:security@docker.com). Thank you!
