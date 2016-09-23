@@ -12,6 +12,7 @@ import (
 	"github.com/docker/dockercloud-agent/utils"
 	"os/exec"
 	"strings"
+	"regexp"
 )
 
 func init() {
@@ -72,7 +73,7 @@ func main() {
 
 	if !*FlagStandalone {
 		Logger.Printf("Registering in Docker Cloud via PATCH: %s",
-			regUrl+Conf.UUID)
+			regUrl + Conf.UUID)
 		err := RegPatch(regUrl, caFilePath, certFilePath, configFilePath)
 		if err != nil {
 			Logger.Printf("PATCH error %s :either UUID (%s) or Token is invalid", err.Error(), Conf.UUID)
@@ -90,9 +91,9 @@ func main() {
 			DownloadDocker(DockerTarURL, DockerHome)
 
 			Logger.Printf("Registering in Docker Cloud via PATCH: %s",
-				regUrl+Conf.UUID)
+				regUrl + Conf.UUID)
 			if err = RegPatch(regUrl, caFilePath, certFilePath, configFilePath); err != nil {
-				Logger.Print( "Registion HTTP error: ", err)
+				Logger.Print("Registion HTTP error: ", err)
 			}
 		}
 	}
@@ -184,19 +185,30 @@ func PrepareFiles(configFilePath, dockerBinPath, keyFilePath, certFilePath strin
 
 func GetOsDistro(release string) string {
 	cmd := exec.Command("sh", "-c", "echo $(. /etc/os-release && echo $ID)")
-	id, err := cmd.Output()
-	if err != nil{
+	id_bytes, err := cmd.Output()
+	if err != nil {
 		Logger.Println(err)
-		id = []byte("unknown")
+		id_bytes = []byte("unknown")
 	}
+	id := strings.TrimSpace(string(id_bytes))
+
 	cmd = exec.Command("sh", "-c", "echo $(. /etc/os-release && echo $VERSION_ID)")
-	version, err := cmd.Output()
-	if err != nil{
+	version_bytes, err := cmd.Output()
+	if err != nil {
 		Logger.Println(err)
-		version = []byte("unknown")
+		version_bytes = []byte("unknown")
 	}
-	distro := fmt.Sprintf("%s/%s", strings.TrimSpace(string(id)), strings.TrimSpace(string(version)))
-	if distro == "/"{
+	version := strings.TrimSpace(string(version_bytes))
+	if id == "rhel" {
+		re := regexp.MustCompile("^(\\d+)[\\.0-9]*")
+		match := re.FindStringSubmatch(version)
+		if match != nil && len(match) > 0 {
+			version = match[1]
+		}
+	}
+
+	distro := fmt.Sprintf("%s/%s", id, version)
+	if distro == "/" {
 		distro = "unknown/unknown"
 	}
 	return distro
