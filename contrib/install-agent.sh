@@ -65,8 +65,8 @@ case "$(get_distribution_type)" in
 		curl -Ls --retry 30 --retry-delay 10 $GPG_KEY_URL | gpg --import -
 		curl -Ls --retry 30 --retry-delay 10 $GPG_KEY_PACKAGE_URL | apt-key add -
 		echo "-> Installing required dependencies..."
-		modprobe -q aufs || apt-get update -qq && apt-get install -yq linux-image-extra-$(uname -r) || \
-			echo "!! Failed to install linux-image-extra package. AUFS support (which is recommended) may not be available."
+		modprobe -q aufs || (apt-get update -qq && apt-get install -yq linux-image-extra-$(uname -r) || \
+			echo "!! Failed to install linux-image-extra package. AUFS support (which is recommended) may not be available.")
 		echo "-> Installing dockercloud-agent..."
 		echo deb [arch=amd64] http://$REPO/ubuntu/ dockercloud main > /etc/apt/sources.list.d/dockercloud.list
 		apt-get update -qq -o Dir::Etc::sourceparts="/dev/null" -o APT::List-Cleanup=0 -o Dir::Etc::sourcelist="sources.list.d/dockercloud.list" && apt-get install -q dockercloud-agent
