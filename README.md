@@ -75,7 +75,7 @@ Run `make` to build binaries and `.deb` and `.rpm` packages which will be stored
 
 # Proxy
 
-If `HTTP_PROXY` and `HTTPS_PRXOY` is defined, cloud-agent will read and use them. (this is supported by golang natively)
+If `HTTP_PROXY` and `HTTPS_PROXY` is defined, cloud-agent will read and use them. (this is supported by golang natively)
 
 ## Supported Distributions
 
