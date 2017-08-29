@@ -102,7 +102,8 @@ cat > /etc/dockercloud/agent/dockercloud-agent.conf <<EOF
 	"Host":"${HOST}",
 	"Token":"${1}",
 	"UUID":"${2}",
-	"CertCommonName":"${3}"
+	"CertCommonName":"${3}",
+	"DockerOpts": "${DOCKER_OPTS}"
 }
 EOF
 
